@@ -215,7 +215,7 @@ def main(args):
     logger.info('-' * 80)
 
     import_pip('github', 'pygithub')
-    from github import Github
+    from github import Github, GithubException
     from github.GithubException import UnknownObjectException
 
     logger.p_debug('-' * 80)
@@ -252,6 +252,36 @@ def main(args):
 
         logger.info('Loaded repository "%s" from GitHub', gh_repo)
 
+        # If the repo exists, see if there have been any commits to double-check with the user
+        try:
+            logger.p_debug('Checking if repository contains commits.')
+            commits = gh_repo.get_commits().get_page(0)
+
+            sanity_check = ask(
+                'It seems as if this repository has commits - are you sure you wish to continue',
+                options=['y', 'n'],
+                default='n',
+                postfix='? '
+            )
+
+            if sanity_check.lower() == 'n':
+                logger.info('Nothing to do!  Goodbye.')
+                exit(0)
+
+        # The repository is empty, no need to do a sanity check
+        except GithubException, e:
+            logger.p_verbose('Error Raised: %s', e)
+
+            if e.data['message'] == 'Git Repository is empty.':
+                logger.p_verbose('Error expected, continuing.')
+                pass
+
+            else:
+                logger.error('Unknown error.  Halting.')
+                raise e
+
+
+    # No repository was found under the provided name
     except UnknownObjectException, e:
         logger.p_verbose("Error Raised: %s", e)
 
