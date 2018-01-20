@@ -1,0 +1,323 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""Bootstrap a GitHub project.
+
+Provides assistance in setting up a GitHub repository from scratch to follow personal standards.  This script is
+intended to be used for projects by Andrew Vaughan, but can be easily forked and modified to suit any needs.
+
+For more information, see the `project readme <https://github.com/andrewvaughan/github-project-bootstrap>`_.
+
+.. note::
+
+   This script is intended to be run in bash.  The release-candidate branch's most recent commit can be run with the
+   following command:
+
+   ``curl -s https://raw.githubusercontent.com/andrewvaughan/github-project-bootstrap/master/bootstrap | bash -h``
+
+   Note that python 2.7 and pip must be installed for this to function.  See the project readme for more information.
+
+.. moduleauthor:: Andrew Vaughan <hello@andrewvaughan.io>
+.. versionadded:: 0.1.0
+"""
+
+import argparse
+import importlib
+import getpass
+import logging
+import os
+import sys
+
+
+# Project Details
+__version__ = '0.1.0'
+__status__ = 'Production'
+
+__copyright__ = 'Copyright 2018, Andrew Vaughan'
+__license__ = 'MIT'
+__docformat__ = 'reStructuredText'
+
+__author__ = 'Andrew Vaughan'
+__maintainer__ = 'Andrew Vaughan'
+__email__ = 'hello@andrewvaughan.io'
+__credits__ = [
+    'Andrew Vaughan'
+]
+
+
+# Add a verbose logging handler to the logging module
+logging.PDEBUG = logging.DEBUG + 2
+logging.addLevelName(logging.PDEBUG, "PDEBUG")
+
+logging.PVERBOSE = logging.DEBUG + 1
+logging.addLevelName(logging.PVERBOSE, "PVERBOSE")
+
+logging.VERBOSE = 1
+logging.addLevelName(logging.VERBOSE, "VERBOSE")
+
+
+def log_PDEBUG(self, message, *args, **kws):
+    """Log a project debug message.
+
+    Args:
+        self (Loggger): the logger calling this method
+        message (str): the message to log
+
+    Kwargs:
+        args*: any arguments to use in the message template
+
+    """
+    if self.isEnabledFor(logging.PDEBUG):
+        self._log(logging.PDEBUG, message, args, **kws)
+
+
+def log_PVERBOSE(self, message, *args, **kws):
+    """Log a project verbose message.
+
+    Args:
+        self (Loggger): the logger calling this method
+        message (str): the message to log
+
+    Kwargs:
+        args*: any arguments to use in the message template
+
+    """
+    if self.isEnabledFor(logging.PVERBOSE):
+        self._log(logging.PVERBOSE, message, args, **kws)
+
+
+def log_verbose(self, message, *args, **kws):
+    """Log a verbose message.
+
+    Args:
+        self (Loggger): the logger calling this method
+        message (str): the message to log
+
+    Kwargs:
+        args*: any arguments to use in the message template
+
+    """
+    if self.isEnabledFor(logging.VERBOSE):
+        self._log(logging.VERBOSE, message, args, **kws)
+
+
+logging.Logger.p_debug = log_PDEBUG
+logging.Logger.p_verbose = log_PVERBOSE
+logging.Logger.verbose = log_verbose
+
+
+def import_pip(module, pip_package):
+    """Import, and install if necessary, a pip module.
+
+    Attempts to import a module with pip.  If it doesn't exist, it installs it and then imports it.
+
+    Args:
+        module (str): the pip module to import
+
+    """
+    logger = logging.getLogger('pip')
+
+    try:
+        logger.p_debug('Attempting import of "%s" pip module', module)
+
+        importlib.import_module(module)
+
+        logger.p_verbose('Module "%s" imported successfully', module)
+
+    except ImportError, e:
+        logger.p_debug('Module "%s" not found, attempting to install from pip', pip_package)
+        logger.p_verbose('Raised Error: %s', e)
+
+        import subprocess
+
+        process = subprocess.Popen(
+            ["pip", "install", pip_package],
+            shell=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+
+        process.wait()
+
+        logger.p_verbose('Module "%s" installed successfully; "%s" now imported', pip_package, module)
+
+
+def ask(msg, options=None, default=None, secure=False, postfix=': '):
+    """Ask for information from the user.
+
+    Presents a prompt to the user for input.  The default value provided is used if a blank entry is received.  If
+    secure is set, the input is hidden from the user (e.g., for passwords).
+
+    Args:
+        msg (str): the prompt text for the user; should not contain any formatting
+        default (str): the default value for the text
+        secure (bool): whether the input being asked for needs to be secured
+        postfix (str): the string to put at the end of the prompt
+
+    Returns:
+        (str) the value entered, or the default provided
+
+    """
+    if options:
+        msg = msg + ' ['
+
+        for opt in options:
+            if opt == default:
+                msg = msg + opt.upper()
+            else:
+                msg = msg + opt.lower()
+
+        msg = msg + '] '
+
+    elif default:
+        msg = msg + (' [%s] ' % default)
+
+    msg = msg + postfix
+
+    print ""
+
+    while True:
+        if secure:
+            response = getpass.getpass(msg)
+        else:
+            response = raw_input(msg)
+
+        if not options:
+            break
+
+        if response.lower() in options:
+            break
+
+        if response == "" and default:
+            break
+
+    print ""
+
+    if not response and default:
+        return default
+
+    return response
+
+
+def main(args):
+    """Bootstrap a given GitHub project.
+
+    This is the main function for this script, calling the GitHub API and running the user through various dialogs and
+    options to configure their GitHub Repository.
+
+    Args:
+        args (dict): Any arguments passed from the command line.
+
+    """
+    logger = logging.getLogger('bootstrap')
+
+    logger.info("GitHub Project Bootstrap v%s", __version__)
+    logger.info('-' * 80)
+
+    import_pip('github', 'pygithub')
+    from github import Github
+    from github.GithubException import UnknownObjectException
+
+    logger.p_debug('-' * 80)
+
+
+    # If no GitHub token is provided, ask for a username and password
+    if args.token:
+        logger.info("GitHub token found")
+        api = Github(args.token)
+
+    else:
+        logger.info('GitHub token not found; switching to basic login')
+
+        username = ask('GitHub username', default='andrewvaughan')
+        password = ask('GitHub password', secure=True)
+
+        api = Github(username, password)
+
+    gh_user = api.get_user()
+
+
+    # Get repository slug
+    if args.repo:
+        logger.info("GitHub Repository: %s", args.repo)
+        repo_slug = args.repo
+
+    else:
+        repo_slug = ask('GitHub Repository', default=os.path.basename(os.getcwd()))
+
+
+    # Load repository from GitHub
+    try:
+        gh_repo = gh_user.get_repo(repo_slug)
+
+        logger.info('Loaded repository "%s" from GitHub', gh_repo)
+
+    except UnknownObjectException, e:
+        logger.p_verbose("Error Raised: %s", e)
+
+        create = ask(
+            'It seems that this is a new repository, would you like to create it at the end of the script',
+            options=['y', 'n'],
+            default='y',
+            postfix='? '
+        )
+
+        if create.lower() == 'n':
+            logger.info('Nothing to do!  Goodbye.')
+            sys.exit(0)
+
+        gh_repo = None
+
+
+# Call the main function if this file is directly run (as intended)
+if __name__ == '__main__':
+    PARSER = argparse.ArgumentParser()
+
+    PARSER.add_argument(
+        "-t",
+        "--token",
+        help="GitHub token"
+    )
+
+    PARSER.add_argument(
+        "-r",
+        "--repo",
+        help="GitHub repository"
+    )
+
+    PARSER.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="increase debugging verbosity (-vvvv for max)"
+    )
+
+    ARGS = PARSER.parse_args()
+
+    LOG_ROOT = logging.getLogger()
+
+    # Set the global logging level
+    LOG_ROOT.setLevel(logging.INFO)
+    if ARGS.verbose == 1:
+        LOG_ROOT.setLevel(logging.PDEBUG)
+    elif ARGS.verbose == 2:
+        LOG_ROOT.setLevel(logging.PVERBOSE)
+    elif ARGS.verbose == 3:
+        LOG_ROOT.setLevel(logging.DEBUG)
+    elif ARGS.verbose >= 4:
+        LOG_ROOT.setLevel(logging.VERBOSE)
+
+    # Add a console output handler to the log
+    LOG_HANDLER = logging.StreamHandler(sys.stdout)
+
+    LOG_HANDLER.setFormatter(
+        logging.Formatter(
+            fmt=u"%(name)10s :: [%(asctime)s] %(levelname)-8s %(message)s"
+        )
+    )
+
+    LOG_ROOT.addHandler(LOG_HANDLER)
+
+    # Bootstrap the project
+    main(ARGS)
