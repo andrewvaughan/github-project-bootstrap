@@ -63,6 +63,10 @@ GITHUB_LABELS = {
     'release': '000000'
 }
 
+GITHUB_MILESTONES = [
+    '0.1.0'
+]
+
 
 # Add a verbose logging handler to the logging module
 logging.PDEBUG = logging.DEBUG + 2
@@ -338,9 +342,12 @@ def main(args):
             logger.p_debug("Defaults selected, continuing...")
             confirm = 'y'
 
-        if confirm == 'y':
+        if confirm == 'n':
+            logger.p_debug("Skipping Repository Labels")
 
-            # Clear GitHub's default labels
+        else:
+
+            # Clear any existing labels
             logger.p_debug("Clearing existing labels...")
 
             labels = gh_repo.get_labels()
@@ -356,8 +363,50 @@ def main(args):
                 logger.p_verbose("Adding label '%s' with color '%s'", label, color)
                 gh_repo.create_label(label, color)
 
+        logger.p_debug("Label configuration complete.");
+
+
+
+    # Milestone
+    if args.skip_milestones:
+        logger.p_debug("Skipping Repository Milestones")
+
+    else:
+        logger.p_debug("Setting up Repository Milestones")
+
+        if not args.defaults:
+            confirm = ask(
+                'Setup milestones?  This will CLEAR any milestones currently setup',
+                options=['y', 'n'],
+                default='y'
+            )
+
         else:
+            logger.p_debug("Defaults selected, continuing...")
+            confirm = 'y'
+
+        if confirm == 'n':
             logger.p_debug("Skipping Repository Labels")
+
+        else:
+
+            # Clear any existing milestones
+            logger.p_debug("Clearing existing milestones...")
+
+            milestones = gh_repo.get_milestones()
+
+            for stone in milestones:
+                logger.p_verbose("Deleting milestone '%s'", stone)
+                stone.delete()
+
+            # Add our milestone list
+            logger.p_debug("Adding default milestones...")
+
+            for stone in GITHUB_MILESTONES:
+                logger.p_verbose("Adding milestone '%s'", stone)
+                gh_repo.create_milestone(stone)
+
+        logger.p_debug("Milestone configuration complete.");
 
 
 
@@ -405,6 +454,12 @@ if __name__ == '__main__':
         "--skip-labels",
         action="store_true",
         help="Skips setting up labels"
+    )
+
+    PARSER.add_argument(
+        "--skip-milestones",
+        action="store_true",
+        help="Skips setting up milestones"
     )
 
 
