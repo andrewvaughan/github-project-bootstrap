@@ -45,6 +45,25 @@ __credits__ = [
 ]
 
 
+# Our standards for projects
+GITHUB_LABELS = {
+    'new': '0e8a16',
+    'fix': '0e8a16',
+    'update': '0e8a16',
+    'build': '0052cc',
+    'upgrade': '0052cc',
+    'docs': 'fbca04',
+    'bug': 'd93f0b',
+    'question': 'f9d0c4',
+    'report': 'f9d0c4',
+    'request': 'f9d0c4',
+    'duplicate': 'eeeeee',
+    'invalid': 'eeeeee',
+    'wontfix': 'eeeeee',
+    'release': '000000'
+}
+
+
 # Add a verbose logging handler to the logging module
 logging.PDEBUG = logging.DEBUG + 2
 logging.addLevelName(logging.PDEBUG, "PDEBUG")
@@ -286,7 +305,7 @@ def main(args):
         logger.p_verbose("Error Raised: %s", e)
 
         create = ask(
-            'It seems that this is a new repository, would you like to create it at the end of the script',
+            'It seems that this is a new repository, would you like to create a new one',
             options=['y', 'n'],
             default='y',
             postfix='? '
@@ -296,12 +315,72 @@ def main(args):
             logger.info('Nothing to do!  Goodbye.')
             sys.exit(0)
 
-        gh_repo = None
+        logger.p_debug("Creating repository '%s'", repo_slug)
+
+        gh_repo = gh_user.create_repo(repo_slug)
+
+
+    # Labels
+    if args.skip_labels:
+        logger.p_debug("Skipping Repository Labels")
+
+    else:
+        logger.p_debug("Setting up Repository Labels")
+
+        if not args.defaults:
+            confirm = ask(
+                'Setup labels?  This will CLEAR any labels currently setup',
+                options=['y', 'n'],
+                default='y'
+            )
+
+        else:
+            logger.p_debug("Defaults selected, continuing...")
+            confirm = 'y'
+
+        if confirm == 'y':
+
+            # Clear GitHub's default labels
+            logger.p_debug("Clearing existing labels...")
+
+            labels = gh_repo.get_labels()
+
+            for label in labels:
+                logger.p_verbose("Deleting label '%s'", label)
+                label.delete()
+
+            # Add our label list
+            logger.p_debug("Adding default labels...")
+
+            for label, color in GITHUB_LABELS.iteritems():
+                logger.p_verbose("Adding label '%s' with color '%s'", label, color)
+                gh_repo.create_label(label, color)
+
+        else:
+            logger.p_debug("Skipping Repository Labels")
+
 
 
 # Call the main function if this file is directly run (as intended)
 if __name__ == '__main__':
-    PARSER = argparse.ArgumentParser()
+    PARSER = argparse.ArgumentParser(
+        description='Sets up a GitHub repository to a standard.',
+        epilog='This tool is designed and intended for use by Andrew Vaughan; however, it may be extended and used by anyone.'
+    )
+
+    PARSER.add_argument(
+        '--version',
+        action='version',
+        version='GitHub Project Bootstrap v%s' % __version__
+    )
+
+    PARSER.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="increase debugging verbosity (-vvvv for max)"
+    )
 
     PARSER.add_argument(
         "-t",
@@ -316,12 +395,18 @@ if __name__ == '__main__':
     )
 
     PARSER.add_argument(
-        "-v",
-        "--verbose",
-        action="count",
-        default=0,
-        help="increase debugging verbosity (-vvvv for max)"
+        "-d",
+        "--defaults",
+        action="store_true",
+        help="Applies all defaults to repository (skips questions)"
     )
+
+    PARSER.add_argument(
+        "--skip-labels",
+        action="store_true",
+        help="Skips setting up labels"
+    )
+
 
     ARGS = PARSER.parse_args()
 
