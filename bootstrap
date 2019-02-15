@@ -45,22 +45,121 @@ __credits__ = [
 ]
 
 
+COLORS = {
+    'red'    : 'ff7474',
+    'orange' : 'ffb16f',
+    'yellow' : 'ffe67c',
+    'blue'   : '8fe1e7',
+    'purple' : 'cfaef2',
+
+    'green'  : 'aaffc7',
+
+    'ltgrey' : 'dddddd',
+    'dkgrey' : '555555',
+    'black'  : '000000'
+}
+
+
 # Our standards for projects
 GITHUB_LABELS = {
-    'new': '0e8a16',
-    'fix': '0e8a16',
-    'update': '0e8a16',
-    'build': '0052cc',
-    'upgrade': '0052cc',
-    'docs': 'fbca04',
-    'bug': 'd93f0b',
-    'question': 'f9d0c4',
-    'report': 'f9d0c4',
-    'request': 'f9d0c4',
-    'duplicate': 'eeeeee',
-    'invalid': 'eeeeee',
-    'wontfix': 'eeeeee',
-    'release': '000000'
+
+    # PRIORITY
+    'Priority: 01-Critical': {
+        'color' : COLORS['red'],
+        'desc'  : 'A critical issue or incident that impacts revenue. 24/7 priority and released as hot-fix.'
+    },
+
+    'Priority: 02-High': {
+        'color' : COLORS['orange'],
+        'desc'  : 'A severe issue or incident that impacts many users. Top priority and released as hot-fix.'
+    },
+
+    'Priority: 03-Normal': {
+        'color' : COLORS['yellow'],
+        'desc'  : 'A standard request that will be processed as part of the project\'s normal lifecycle.'
+    },
+
+    'Priority: 04-Low': {
+        'color' : COLORS['blue'],
+        'desc'  : 'Will be addressed when all priorities "Normal" and above are completed.'
+    },
+
+    'Priority: 05-Trivial': {
+        'color' : COLORS['purple'],
+        'desc'  : 'Will be addressed when all priorities "Low" and above are completed.'
+    },
+
+
+    # STATUS
+    'Status: 01-Pending': {
+        'color' : COLORS['ltgrey'],
+        'desc'  : 'This change has been approved and is awaiting development.'
+    },
+
+    'Status: 02-In Progress': {
+        'color' : COLORS['green'],
+        'desc'  : 'Issue is actively being developed by a contributor.'
+    },
+
+    'Status: 03-Staged': {
+        'color' : COLORS['blue'],
+        'desc'  : 'The development has been accepted by a project maintainer and merged into the develop branch.'
+    },
+
+    'Status: 04-Released': {
+        'color' : COLORS['black'],
+        'desc'  : 'This has been released on production. The issue is closed.'
+    },
+
+    'Status: On Hold': {
+        'color' : COLORS['orange'],
+        'desc'  : 'A project maintainer has placed a temporary hold on development. See issue for details.'
+    },
+
+    'Status: Need More Info': {
+        'color' : COLORS['orange'],
+        'desc'  : 'More information is required from the reporter for action to continue.'
+    },
+
+
+    # TYPE
+    'Type: Feature': {
+        'color' : COLORS['green'],
+        'desc'  : 'A new feature or enhancement to existing functionality.'
+    },
+
+    'Type: Bug': {
+        'color' : COLORS['red'],
+        'desc'  : 'An unintended outcome, experience, or issue with the platform.'
+    },
+
+    'Type: Documentation': {
+        'color' : COLORS['yellow'],
+        'desc'  : 'Updated or new documentation or documentation tools for the project.'
+    },
+
+    'Type: Maintenance': {
+        'color' : COLORS['blue'],
+        'desc'  : 'An update to dependencies or other maintenance requirements.'
+    },
+
+    'Type: Release': {
+        'color' : COLORS['black'],
+        'desc'  : 'A versioned release of the project.'
+    },
+
+
+    # WONTFIX
+
+    'Wontfix: Duplicate': {
+        'color' : COLORS['dkgrey'],
+        'desc'  : 'This issue is a duplicate of another issue. See issue for details.'
+    },
+
+    'Wontfix: Invalid': {
+        'color' : COLORS['dkgrey'],
+        'desc'  : 'This issue is invalid or inappropriate. See issue for details.'
+    }
 }
 
 GITHUB_MILESTONES = [
@@ -359,9 +458,12 @@ def main(args):
             # Add our label list
             logger.p_debug("Adding default labels...")
 
-            for label, color in GITHUB_LABELS.iteritems():
+            for label, details in GITHUB_LABELS.iteritems():
+                color = details['color']
+                desc = details['desc']
+
                 logger.p_verbose("Adding label '%s' with color '%s'", label, color)
-                gh_repo.create_label(label, color)
+                gh_repo.create_label(label, color, desc)
 
         logger.p_debug("Label configuration complete.");
 
