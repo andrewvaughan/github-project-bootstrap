@@ -343,7 +343,7 @@ def main(args):
     logger.p_debug('-' * 80)
 
 
-    # If no GitHub token is provided, ask for a username and password
+    # If a token is provided, skip basic login
     if args.token:
         logger.info("GitHub token found")
         api = Github(args.token)
@@ -356,23 +356,35 @@ def main(args):
 
         api = Github(username, password)
 
+
     gh_user = api.get_user()
 
+
+    # If using an organization, prepend that
+    repo_slug = ""
+    if args.org != None:
+        logger.info("Organization found: %s", args.org)
+        repo_slug = args.org + "/"
+    else:
+        logger.info("User found: %s", gh_user.login)
+        repo_slug = gh_user.login + "/"
 
     # Get repository slug
     if args.repo:
         logger.info("GitHub Repository: %s", args.repo)
-        repo_slug = args.repo
+        repo_slug = "%s%s" % (repo_slug, args.repo)
 
     else:
-        repo_slug = ask('GitHub Repository', default=os.path.basename(os.getcwd()))
+        repo_slug += ask('%s Repository' % ("Organization" if args.org else "User"), default=os.path.basename(os.getcwd()))
 
 
     # Load repository from GitHub
     try:
-        gh_repo = gh_user.get_repo(repo_slug)
+        logger.info('Attempting to load repository "%s" from GitHub', repo_slug)
 
-        logger.info('Loaded repository "%s" from GitHub', gh_repo)
+        gh_repo = api.get_repo(repo_slug)
+
+        logger.debug('Loaded successfully')
 
         # If the repo exists, see if there have been any commits to double-check with the user
         try:
@@ -537,6 +549,13 @@ if __name__ == '__main__':
         "-t",
         "--token",
         help="GitHub token"
+    )
+
+    PARSER.add_argument(
+        "-o",
+        "--org",
+        default=None,
+        help="The organization to access instead of a user (default: None)"
     )
 
     PARSER.add_argument(
