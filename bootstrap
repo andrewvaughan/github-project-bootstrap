@@ -46,22 +46,59 @@ __credits__ = [
 
 
 COLORS = {
-    'red'    : 'ff7474',
-    'orange' : 'ffb16f',
-    'yellow' : 'ffe67c',
-    'blue'   : '8fe1e7',
-    'purple' : 'cfaef2',
+    'ltred'    : 'ffdddd',
+    'red'      : 'ff7474',
 
-    'green'  : 'aaffc7',
+    'orange'   : 'ffb16f',
 
-    'ltgrey' : 'dddddd',
-    'dkgrey' : '555555',
-    'black'  : '000000'
+    'ltyellow' : 'fff6cc',
+    'yellow'   : 'ffe67c',
+
+    'ltblue'   : 'dfefff',
+    'blue'     : '8fe1e7',
+
+    'purple'   : 'cfaef2',
+
+    'ltgreen'  : 'ddffd7',
+    'green'    : 'aaffc7',
+
+    'ltgrey'   : 'dddddd',
+    'dkgrey'   : '555555',
+    'black'    : '000000',
+
+    'magenta'  : 'ff00ff'
 }
 
 
 # Our standards for projects
 GITHUB_LABELS = {
+
+    # REQUESTS
+    'Request: Bug Fix': {
+        'color' : COLORS['ltred'],
+        'desc'  : 'Report of an unintended outcome, experience, or issue with the platform.'
+    },
+
+    'Request: DevOps': {
+        'color' : COLORS['ltblue'],
+        'desc'  : 'Request for an update to dependencies or other operational requirements.'
+    },
+
+    'Request: Documentation': {
+        'color' : COLORS['ltyellow'],
+        'desc'  : 'Request for updated or new documentation or documentation tools for the project.'
+    },
+
+    'Request: Feature': {
+        'color' : COLORS['ltgreen'],
+        'desc'  : 'Request for a new feature or enhancement to existing functionality.'
+    },
+
+    'Request: Support': {
+        'color' : COLORS['ltgrey'],
+        'desc'  : 'Request for support in installing or using the product.'
+    },
+
 
     # PRIORITY
     'Priority: 01-Critical': {
@@ -91,22 +128,32 @@ GITHUB_LABELS = {
 
 
     # STATUS
-    'Status: 01-Pending': {
+    'Status: 01-Pending Initiation': {
         'color' : COLORS['ltgrey'],
-        'desc'  : 'This change has been approved and is awaiting development.'
+        'desc'  : 'This change has been approved by the code owners and is awaiting development.'
     },
 
     'Status: 02-In Progress': {
-        'color' : COLORS['green'],
+        'color' : COLORS['ltgreen'],
         'desc'  : 'Issue is actively being developed by a contributor.'
     },
 
-    'Status: 03-Staged': {
+    'Status: 03-Code Review': {
+        'color' : COLORS['green'],
+        'desc'  : 'Issue is being reviewed for approval by core contributors.'
+    },
+
+    'Status: 04-Pending Staging': {
         'color' : COLORS['blue'],
+        'desc'  : 'Issue has been compeleted, passed review, and is now awaiting deployment to staging.'
+    },
+
+    'Status: 05-Staged': {
+        'color' : COLORS['dkgrey'],
         'desc'  : 'The development has been accepted by a project maintainer and merged into the develop branch.'
     },
 
-    'Status: 04-Released': {
+    'Status: 06-Released': {
         'color' : COLORS['black'],
         'desc'  : 'This has been released on production. The issue is closed.'
     },
@@ -138,9 +185,9 @@ GITHUB_LABELS = {
         'desc'  : 'Updated or new documentation or documentation tools for the project.'
     },
 
-    'Type: Maintenance': {
+    'Type: DevOps': {
         'color' : COLORS['blue'],
-        'desc'  : 'An update to dependencies or other maintenance requirements.'
+        'desc'  : 'An update to dependencies or other operational requirements.'
     },
 
     'Type: Release': {
@@ -159,7 +206,15 @@ GITHUB_LABELS = {
     'Wontfix: Invalid': {
         'color' : COLORS['dkgrey'],
         'desc'  : 'This issue is invalid or inappropriate. See issue for details.'
+    },
+
+
+    # MISCELLANEOUS
+    'New Issue': {
+        'color' : COLORS['magenta'],
+        'desc'  : 'An unreviewed issue that needs to be sorted by repository owners.'
     }
+
 }
 
 GITHUB_MILESTONES = [
