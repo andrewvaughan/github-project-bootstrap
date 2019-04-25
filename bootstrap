@@ -218,7 +218,174 @@ GITHUB_LABELS = {
 }
 
 GITHUB_MILESTONES = [
-    '0.1.0'
+    'v0.1.0'
+]
+
+GITHUB_ISSUES = [
+    {
+        'title'     : 'Add git configuration files',
+        'body'      : 'Add `.gitignore` and `.gitattributes` to prepare the repository.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: DevOps'
+        ]
+    },
+
+    {
+        'title'     : 'Add editor configuration file',
+        'body'      : 'Add `.editorconfig` to control IDE spacing management.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: DevOps'
+        ]
+    },
+
+    {
+        'title'     : 'Add readme documentation',
+        'body'      : 'Add a `README.md` file to document instructions, installation, usage details, contribution guidelines, and the license.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: Documentation'
+        ]
+    },
+
+    {
+        'title'     : 'Add license documentation',
+        'body'      : 'Add a `LICENSE` file to document license for project.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: Documentation'
+        ]
+    },
+
+    {
+        'title'     : 'Add contributing documentation',
+        'body'      : 'Add a `CONTRIBUTING.md` file to document contribution instructions and standards.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: Documentation'
+        ]
+    },
+
+    {
+        'title'     : 'Add code of conduct documentation',
+        'body'      : 'Add a `CODE_OF_CONDUCT.md` file to document community standards.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: Documentation'
+        ]
+    },
+
+    {
+        'title'     : 'Add support documentation',
+        'body'      : 'Add a `SUPPORT.md` file to document project support directions.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: Documentation'
+        ]
+    },
+
+    {
+        'title'     : 'Add GitHub issue templates',
+        'body'      : 'Add templates for GitHub labels including Bug Report, Documentation Request, Feature Request, Maintenance Request, and Support Request.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: DevOps'
+        ]
+    },
+
+    {
+        'title'     : 'Add GitHub pull request template',
+        'body'      : 'Add a template for GitHub for instructions when making a Pull Request.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: DevOps'
+        ]
+    },
+
+    {
+        'title'     : 'Develop make and test tool',
+        'body'      : 'Create a `Makefile` or similar to support building and testing.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: DevOps'
+        ]
+    },
+
+    {
+        'title'     : 'Add linting functionality',
+        'body'      : 'Add functionality to lint code for standard compliance on test.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: DevOps'
+        ]
+    },
+
+    {
+        'title'     : 'Add a changelog generator',
+        'body'      : 'Add functionality to generate a changelog for GitHub releases.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: DevOps'
+        ]
+    },
+
+    {
+        'title'     : 'Add Continuous Integration support',
+        'body'      : 'Install functionality for continuous integration upon Pull Request. Must include code coverage reporting, documentation coverage (if supported), and dependency reporting (if supported).',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: DevOps'
+        ]
+    },
+
+    {
+        'title'     : 'Add unit and integration testing run commands',
+        'body'      : 'Add support for unit testing and add controls within `Makefile` or similar script controller.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: DevOps'
+        ]
+    },
+
+    {
+        'title'     : 'Add cleanup utility to scripts',
+        'body'      : 'Support `make clean` or similar to clean up temporary or unwanted files from the repository.',
+        'milestone' : 1,
+        'labels'    : [
+            'Priority: 03-Normal',
+            'Status: 01-Pending Initiation',
+            'Type: DevOps'
+        ]
+    }
 ]
 
 
@@ -555,7 +722,7 @@ def main(args):
             confirm = 'y'
 
         if confirm == 'n':
-            logger.p_debug("Skipping Repository Labels")
+            logger.p_debug("Skipping Milestones")
 
         else:
 
@@ -575,7 +742,47 @@ def main(args):
                 logger.p_verbose("Adding milestone '%s'", stone)
                 gh_repo.create_milestone(stone)
 
-        logger.p_debug("Milestone configuration complete.");
+        logger.p_debug("Milestone generation complete.");
+
+
+    # Common Issues
+    if args.skip_issues:
+        logger.p_debug("Skipping Common Issues")
+
+    else:
+        logger.p_debug("Setting up Common Issues")
+
+        if not args.defaults:
+            confirm = ask(
+                'Setup common issues?  This may duplicate issues in your project, if any exist',
+                options=['y', 'n'],
+                default='y'
+            )
+
+        else:
+            logger.p_debug("Defaults selected, continuing...")
+            confirm = 'y'
+
+        if confirm == 'n':
+            logger.p_debug("Skipping Common Issues")
+
+        else:
+
+            # Add our milestone list
+            logger.p_debug("Adding common issues...")
+
+            for issue in GITHUB_ISSUES:
+
+                logger.p_verbose("Adding milestone '%s'", issue['title'])
+
+                gh_repo.create_issue(
+                    title=issue['title'],
+                    body=issue['body'],
+                    milestone=gh_repo.get_milestone(issue['milestone']),
+                    labels=issue['labels']
+                )
+
+        logger.p_debug("Common issue generation complete.");
 
 
 
@@ -636,6 +843,12 @@ if __name__ == '__main__':
         "--skip-milestones",
         action="store_true",
         help="Skips setting up milestones"
+    )
+
+    PARSER.add_argument(
+        "--skip-issues",
+        action="store_true",
+        help="Skips creating common issues"
     )
 
 
