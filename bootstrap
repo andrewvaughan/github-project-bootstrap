@@ -195,6 +195,11 @@ GITHUB_LABELS = {
         'desc'  : 'A versioned release of the project.'
     },
 
+    'Type: Hotfix': {
+        'color' : COLORS['red'],
+        'desc'  : 'An urgent item that must bypass the normal workflow to be placed on production as soon as possible.'
+    },
+
 
     # WONTFIX
 
