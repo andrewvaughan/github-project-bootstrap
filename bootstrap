@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """Bootstrap a GitHub project.
@@ -76,7 +76,7 @@ GITHUB_LABELS = {
     # REQUESTS
     'Request: Bug Fix': {
         'color' : COLORS['ltred'],
-        'desc'  : 'Report of an unintended outcome, experience, or issue with the platform.'
+        'desc'  : 'Report of an unintended outcome, experience, or issue with the project.'
     },
 
     'Request: DevOps': {
@@ -96,7 +96,7 @@ GITHUB_LABELS = {
 
     'Request: Support': {
         'color' : COLORS['ltgrey'],
-        'desc'  : 'Request for support in installing or using the product.'
+        'desc'  : 'Request for support with installing or using this project.'
     },
 
 
@@ -210,7 +210,7 @@ GITHUB_LABELS = {
 
 
     # MISCELLANEOUS
-    'New Issue': {
+    'Needs Triage': {
         'color' : COLORS['magenta'],
         'desc'  : 'An unreviewed issue that needs to be sorted by repository owners.'
     }
@@ -218,7 +218,9 @@ GITHUB_LABELS = {
 }
 
 GITHUB_MILESTONES = [
-    '0.1.0'
+    '0.0.1',
+    '0.1.0',
+    '1.0.0'
 ]
 
 
@@ -301,14 +303,14 @@ def import_pip(module, pip_package):
 
         logger.p_verbose('Module "%s" imported successfully', module)
 
-    except ImportError, e:
+    except ImportError as e:
         logger.p_debug('Module "%s" not found, attempting to install from pip', pip_package)
         logger.p_verbose('Raised Error: %s', e)
 
         import subprocess
 
         process = subprocess.Popen(
-            ["pip", "install", pip_package],
+            ["python", "-m", "pip", "install", pip_package],
             shell=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
@@ -351,13 +353,13 @@ def ask(msg, options=None, default=None, secure=False, postfix=': '):
 
     msg = msg + postfix
 
-    print ""
+    print("")
 
     while True:
         if secure:
             response = getpass.getpass(msg)
         else:
-            response = raw_input(msg)
+            response = input(msg)
 
         if not options:
             break
@@ -368,7 +370,7 @@ def ask(msg, options=None, default=None, secure=False, postfix=': '):
         if response == "" and default:
             break
 
-    print ""
+    print("")
 
     if not response and default:
         return default
@@ -458,7 +460,7 @@ def main(args):
                 exit(0)
 
         # The repository is empty, no need to do a sanity check
-        except GithubException, e:
+        except GithubException as e:
             logger.p_verbose('Error Raised: %s', e)
 
             if e.data['message'] == 'Git Repository is empty.':
@@ -471,7 +473,7 @@ def main(args):
 
 
     # No repository was found under the provided name
-    except UnknownObjectException, e:
+    except UnknownObjectException as e:
         logger.p_verbose("Error Raised: %s", e)
 
         create = ask(
@@ -525,7 +527,7 @@ def main(args):
             # Add our label list
             logger.p_debug("Adding default labels...")
 
-            for label, details in GITHUB_LABELS.iteritems():
+            for label, details in GITHUB_LABELS.items():
                 color = details['color']
                 desc = details['desc']
 
